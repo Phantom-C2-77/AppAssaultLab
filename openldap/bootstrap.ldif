@@ -1,0 +1,62 @@
+dn: ou=People,dc=widgetcorp,dc=local
+objectClass: organizationalUnit
+ou: People
+
+dn: ou=Groups,dc=widgetcorp,dc=local
+objectClass: organizationalUnit
+ou: Groups
+
+dn: ou=ServiceAccounts,dc=widgetcorp,dc=local
+objectClass: organizationalUnit
+ou: ServiceAccounts
+
+dn: cn=admin.jenkins,ou=ServiceAccounts,dc=widgetcorp,dc=local
+objectClass: inetOrgPerson
+cn: admin.jenkins
+sn: Jenkins
+givenName: Admin
+mail: jenkins@widgetcorp.local
+uid: admin.jenkins
+userPassword: admin
+description: Jenkins CI/CD admin account - FLAG{ld4p_an0n_b1nd_dump}
+
+dn: cn=svc.deploy,ou=ServiceAccounts,dc=widgetcorp,dc=local
+objectClass: inetOrgPerson
+cn: svc.deploy
+sn: Deploy
+givenName: Service
+mail: deploy@widgetcorp.local
+uid: svc.deploy
+userPassword: deploy123
+description: Production deployment service account
+
+dn: cn=john.smith,ou=People,dc=widgetcorp,dc=local
+objectClass: inetOrgPerson
+cn: john.smith
+sn: Smith
+givenName: John
+mail: j.smith@widgetcorp.local
+uid: john.smith
+userPassword: Welcome123!
+title: Senior Developer
+
+dn: cn=mary.chen,ou=People,dc=widgetcorp,dc=local
+objectClass: inetOrgPerson
+cn: mary.chen
+sn: Chen
+givenName: Mary
+mail: m.chen@widgetcorp.local
+uid: mary.chen
+userPassword: DevOps2026!
+title: DevOps Lead
+
+dn: cn=david.wilson,ou=People,dc=widgetcorp,dc=local
+objectClass: inetOrgPerson
+cn: david.wilson
+sn: Wilson
+givenName: David
+mail: d.wilson@widgetcorp.local
+uid: david.wilson
+userPassword: P@ssw0rd123
+title: IT Administrator
+description: Has admin access to all systems
