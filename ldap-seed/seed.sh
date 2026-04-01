@@ -8,7 +8,7 @@ for i in $(seq 1 30); do
     sleep 2
 done
 
-sleep 3
+sleep 10
 
 # Add organizational units
 ldapadd -x -H ldap://openldap:389 -D "cn=admin,dc=widgetcorp,dc=local" -w admin123 << 'EOF'
@@ -25,7 +25,7 @@ objectClass: organizationalUnit
 ou: ServiceAccounts
 EOF
 
-sleep 1
+sleep 5
 
 # Add users with passwords (some weak, some in descriptions)
 ldapadd -x -H ldap://openldap:389 -D "cn=admin,dc=widgetcorp,dc=local" -w admin123 << 'EOF'
