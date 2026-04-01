@@ -1,4 +1,4 @@
-FROM jenkins/jenkins:2.441-lts
+FROM jenkins/jenkins:lts
 
 # CVE-2024-23897 — Arbitrary File Read via CLI
 # Also: Script Console with weak creds
