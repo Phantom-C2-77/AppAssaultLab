@@ -1,4 +1,4 @@
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 # CVE-2014-6271 — Shellshock simulation
 # We install an older bash and create a vulnerable CGI setup
