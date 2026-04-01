@@ -3,7 +3,10 @@ FROM ubuntu:14.04
 # CVE-2014-6271 — Shellshock (Bash RCE via CGI)
 # Ubuntu 14.04 ships with vulnerable Bash 4.3
 
-RUN apt-get update && apt-get install -y apache2
+# Use archive repos since 14.04 is EOL
+RUN sed -i 's/archive.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list && \
+    sed -i 's/security.ubuntu.com/old-releases.ubuntu.com/g' /etc/apt/sources.list && \
+    apt-get update && apt-get install -y apache2
 
 # Enable CGI
 RUN a2enmod cgi
