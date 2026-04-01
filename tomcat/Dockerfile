@@ -1,28 +1,18 @@
 FROM tomcat:9.0.30-jdk11
 
-RUN apt-get update && apt-get install -y --no-install-recommends dos2unix \
-    && rm -rf /var/lib/apt/lists/*
-
 # Enable AJP connector (Ghostcat CVE-2020-1938)
 COPY server.xml /usr/local/tomcat/conf/server.xml
-RUN dos2unix /usr/local/tomcat/conf/server.xml
 
 # Enable Manager app — copy from webapps.dist to webapps
 RUN cp -r /usr/local/tomcat/webapps.dist/manager /usr/local/tomcat/webapps/manager && \
     cp -r /usr/local/tomcat/webapps.dist/host-manager /usr/local/tomcat/webapps/host-manager
 
-# Weak credentials — MUST come after manager copy
-COPY tomcat-users.xml /usr/local/tomcat/conf/tomcat-users.xml
-RUN dos2unix /usr/local/tomcat/conf/tomcat-users.xml
+# Weak credentials — write directly to avoid CRLF issues
+RUN printf '<?xml version="1.0" encoding="UTF-8"?>\n<tomcat-users>\n  <role rolename="manager-gui"/>\n  <role rolename="manager-script"/>\n  <role rolename="admin-gui"/>\n  <user username="tomcat" password="tomcat" roles="manager-gui,manager-script,admin-gui"/>\n</tomcat-users>\n' > /usr/local/tomcat/conf/tomcat-users.xml
 
 # Remove IP restrictions on Manager app
-COPY context.xml /usr/local/tomcat/webapps/manager/META-INF/context.xml
-COPY context.xml /usr/local/tomcat/webapps/host-manager/META-INF/context.xml
-RUN dos2unix /usr/local/tomcat/webapps/manager/META-INF/context.xml && \
-    dos2unix /usr/local/tomcat/webapps/host-manager/META-INF/context.xml
-
-# Verify files are readable
-RUN cat /usr/local/tomcat/conf/tomcat-users.xml
+RUN printf '<?xml version="1.0" encoding="UTF-8"?>\n<Context antiResourceLocking="false" privileged="true">\n</Context>\n' > /usr/local/tomcat/webapps/manager/META-INF/context.xml && \
+    printf '<?xml version="1.0" encoding="UTF-8"?>\n<Context antiResourceLocking="false" privileged="true">\n</Context>\n' > /usr/local/tomcat/webapps/host-manager/META-INF/context.xml
 
 # Flag
 RUN echo "FLAG{t0mcat_gh0stcat_ajp_pwn3d}" > /flag.txt && chmod 644 /flag.txt
