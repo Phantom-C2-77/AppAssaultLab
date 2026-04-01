@@ -5,7 +5,7 @@
 #  Network: appnet (10.30.10.0/24)
 #  All services on one network for enumeration practice
 #
-#  Ports: 8001-8015 (one per app) + 7777 (scoreboard)
+#  Ports: 9001-9015 (one per app) + 9999 (scoreboard)
 #
 ###############################################################
 
@@ -37,7 +37,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.10
     ports:
-      - "8001:80"
+      - "9001:80"
     depends_on:
       - wordpress-db
     restart: unless-stopped
@@ -80,7 +80,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.20
     ports:
-      - "8002:80"
+      - "9002:80"
     depends_on:
       - joomla-db
     restart: unless-stopped
@@ -108,7 +108,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.30
     ports:
-      - "8003:80"
+      - "9003:80"
     restart: unless-stopped
 
   # ══════════════════════════════════════════
@@ -125,8 +125,8 @@ services:
       appnet:
         ipv4_address: 10.30.10.40
     ports:
-      - "8004:8080"
-      - "8009:8009"
+      - "9004:8080"
+      - "9009:8009"
     restart: unless-stopped
 
   # Jenkins 2.441 — CVE-2024-23897 (Arbitrary File Read via CLI)
@@ -140,7 +140,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.50
     ports:
-      - "8005:8080"
+      - "9005:8080"
     restart: unless-stopped
 
   # GitLab CE 13.10.2 — CVE-2021-22205 (RCE via ExifTool)
@@ -149,12 +149,12 @@ services:
     container_name: aa-gitlab
     hostname: gitlab
     environment:
-      - GITLAB_OMNIBUS_CONFIG=external_url 'http://localhost:8006'; gitlab_rails['initial_root_password'] = 'P@ssw0rd123';
+      - GITLAB_OMNIBUS_CONFIG=external_url 'http://localhost:9006'; gitlab_rails['initial_root_password'] = 'P@ssw0rd123';
     networks:
       appnet:
         ipv4_address: 10.30.10.60
     ports:
-      - "8006:80"
+      - "9006:80"
     shm_size: '256m'
     restart: unless-stopped
 
@@ -174,7 +174,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.70
     ports:
-      - "8007:8000"
+      - "9007:8000"
     restart: unless-stopped
 
   # ══════════════════════════════════════════
@@ -190,7 +190,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.80
     ports:
-      - "8012:80"
+      - "9012:80"
     restart: unless-stopped
 
   # Shellshock — CVE-2014-6271 (Bash RCE via CGI)
@@ -202,7 +202,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.81
     ports:
-      - "8013:80"
+      - "9013:80"
     restart: unless-stopped
 
   # ══════════════════════════════════════════
@@ -223,7 +223,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.90
     ports:
-      - "8014:80"
+      - "9014:80"
     depends_on:
       - wordpress-db
     restart: unless-stopped
@@ -244,7 +244,7 @@ services:
       appnet:
         ipv4_address: 10.30.10.100
     ports:
-      - "8015:389"
+      - "9015:389"
     restart: unless-stopped
 
   ldap-seed:
@@ -269,5 +269,5 @@ services:
       appnet:
         ipv4_address: 10.30.10.200
     ports:
-      - "7777:5000"
+      - "9099:5000"
     restart: unless-stopped
