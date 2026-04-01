@@ -236,10 +236,13 @@ services:
     environment:
       - LDAP_ORGANISATION=Widget Corp
       - LDAP_DOMAIN=widgetcorp.local
+      - LDAP_BASE_DN=dc=widgetcorp,dc=local
       - LDAP_ADMIN_PASSWORD=admin123
       - LDAP_READONLY_USER=true
       - LDAP_READONLY_USER_USERNAME=readonly
       - LDAP_READONLY_USER_PASSWORD=readonly123
+      - LDAP_TLS=false
+      - LDAP_REMOVE_CONFIG_AFTER_SETUP=false
     networks:
       appnet:
         ipv4_address: 10.30.10.100
