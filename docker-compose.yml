@@ -90,7 +90,7 @@ services:
     container_name: aa-joomla-db
     hostname: joomla-db
     environment:
-      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_ROOT_PASSWORD=FLAG{j00mla_4pi_1nf0_l3ak}
       - MYSQL_DATABASE=joomla
       - MYSQL_USER=joomla_user
       - MYSQL_PASSWORD=joomla_password
@@ -101,7 +101,7 @@ services:
 
   # Drupal 8.5.0 — CVE-2018-7600 (Drupalgeddon2 — Unauthenticated RCE)
   drupal:
-    image: drupal:8.5.0
+    build: ./drupal
     container_name: aa-drupal
     hostname: drupal
     networks:
@@ -218,6 +218,7 @@ services:
       - PMA_HOST=wordpress-db
       - PMA_USER=root
       - PMA_PASSWORD=rootpassword
+      - FLAG=FLAG{phpmyadm1n_lf1_rc3}
     networks:
       appnet:
         ipv4_address: 10.30.10.90
@@ -245,6 +246,16 @@ services:
     ports:
       - "8015:389"
     restart: unless-stopped
+
+  ldap-seed:
+    build: ./ldap-seed
+    container_name: aa-ldap-seed
+    depends_on:
+      - openldap
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.101
+    restart: "no"
 
   # ══════════════════════════════════════════
   #  Scoreboard
