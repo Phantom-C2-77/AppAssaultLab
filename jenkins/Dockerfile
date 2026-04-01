@@ -17,6 +17,9 @@ RUN jenkins-plugin-cli --plugins \
 COPY jenkins.yaml /var/jenkins_home/casc.yaml
 ENV CASC_JENKINS_CONFIG=/var/jenkins_home/casc.yaml
 
+# Disable CSRF protection via init script
+COPY init.groovy.d/disable-csrf.groovy /usr/share/jenkins/ref/init.groovy.d/disable-csrf.groovy
+
 # Flag
 USER root
 RUN echo "FLAG{j3nk1ns_cl1_f1l3_r3ad}" > /flag.txt && chmod 644 /flag.txt

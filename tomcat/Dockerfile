@@ -3,7 +3,11 @@ FROM tomcat:9.0.30-jdk11
 # Enable AJP connector (Ghostcat CVE-2020-1938)
 COPY server.xml /usr/local/tomcat/conf/server.xml
 
-# Enable Manager app with weak credentials
+# Enable Manager app — copy from webapps.dist to webapps
+RUN cp -r /usr/local/tomcat/webapps.dist/manager /usr/local/tomcat/webapps/manager && \
+    cp -r /usr/local/tomcat/webapps.dist/host-manager /usr/local/tomcat/webapps/host-manager
+
+# Weak credentials for Manager
 COPY tomcat-users.xml /usr/local/tomcat/conf/tomcat-users.xml
 COPY context.xml /usr/local/tomcat/webapps/manager/META-INF/context.xml
 COPY context.xml /usr/local/tomcat/webapps/host-manager/META-INF/context.xml
