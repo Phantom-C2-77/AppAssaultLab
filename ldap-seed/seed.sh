@@ -1,17 +1,19 @@
 #!/bin/bash
 echo "[*] Waiting for LDAP server..."
-for i in $(seq 1 30); do
+for i in $(seq 1 60); do
     if ldapsearch -x -H ldap://openldap:389 -b "dc=widgetcorp,dc=local" -s base > /dev/null 2>&1; then
         echo "[+] LDAP is ready"
         break
     fi
-    sleep 2
+    sleep 3
 done
 
-sleep 10
+sleep 15
+echo "[*] Adding organizational units..."
 
-# Add organizational units
-ldapadd -x -H ldap://openldap:389 -D "cn=admin,dc=widgetcorp,dc=local" -w admin123 << 'EOF'
+# Add OUs with retry
+for attempt in 1 2 3; do
+    ldapadd -x -H ldap://openldap:389 -D "cn=admin,dc=widgetcorp,dc=local" -w admin123 << 'EOF' 2>/dev/null && break
 dn: ou=People,dc=widgetcorp,dc=local
 objectClass: organizationalUnit
 ou: People
@@ -24,11 +26,16 @@ dn: ou=ServiceAccounts,dc=widgetcorp,dc=local
 objectClass: organizationalUnit
 ou: ServiceAccounts
 EOF
+    echo "[-] OU add attempt $attempt failed, retrying..."
+    sleep 5
+done
 
 sleep 5
+echo "[*] Adding users..."
 
-# Add users with passwords (some weak, some in descriptions)
-ldapadd -x -H ldap://openldap:389 -D "cn=admin,dc=widgetcorp,dc=local" -w admin123 << 'EOF'
+# Add users with retry
+for attempt in 1 2 3; do
+    ldapadd -x -H ldap://openldap:389 -D "cn=admin,dc=widgetcorp,dc=local" -w admin123 << 'EOF' 2>/dev/null && break
 dn: cn=admin.jenkins,ou=ServiceAccounts,dc=widgetcorp,dc=local
 objectClass: inetOrgPerson
 cn: admin.jenkins
@@ -37,7 +44,7 @@ givenName: Admin
 mail: jenkins@widgetcorp.local
 uid: admin.jenkins
 userPassword: admin
-description: Jenkins CI/CD admin account — FLAG{ld4p_an0n_b1nd_dump}
+description: Jenkins CI/CD admin account - FLAG{ld4p_an0n_b1nd_dump}
 
 dn: cn=svc.deploy,ou=ServiceAccounts,dc=widgetcorp,dc=local
 objectClass: inetOrgPerson
@@ -79,17 +86,13 @@ uid: david.wilson
 userPassword: P@ssw0rd123
 title: IT Administrator
 description: Has admin access to all systems
-
-dn: cn=backup.svc,ou=ServiceAccounts,dc=widgetcorp,dc=local
-objectClass: inetOrgPerson
-cn: backup.svc
-sn: Backup
-givenName: Service
-mail: backup@widgetcorp.local
-uid: backup.svc
-userPassword: Backup2026!
-description: Automated backup service — SSH key at /opt/backups/.ssh/id_rsa
 EOF
+    echo "[-] User add attempt $attempt failed, retrying..."
+    sleep 5
+done
 
-echo "[+] LDAP users seeded"
+# Verify
+echo "[*] Verifying..."
+COUNT=$(ldapsearch -x -H ldap://openldap:389 -b "dc=widgetcorp,dc=local" "(objectClass=person)" cn 2>/dev/null | grep -c "^cn:")
+echo "[+] Found $COUNT users"
 echo "[+] LDAP seed complete"
