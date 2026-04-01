@@ -1,0 +1,33 @@
+jenkins:
+  securityRealm:
+    local:
+      allowsSignup: false
+      users:
+        - id: admin
+          password: admin
+  authorizationStrategy: unsecured
+  remotingSecurity:
+    enabled: false
+
+security:
+  crumbIssuer: null
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - string:
+              id: api-secret
+              scope: GLOBAL
+              secret: "FLAG{j3nk1ns_cl1_f1l3_r3ad}"
+              description: "Internal API secret — DO NOT SHARE"
+          - usernamePassword:
+              id: deploy-creds
+              scope: GLOBAL
+              username: deployer
+              password: "D3pl0y_S3cr3t!"
+              description: "Production deployment credentials"
+
+unclassified:
+  location:
+    url: "http://jenkins:8080/"

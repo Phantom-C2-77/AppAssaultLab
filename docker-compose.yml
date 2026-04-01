@@ -1,0 +1,262 @@
+###############################################################
+#  AppAssault Lab — Attacking Common Applications
+#  15 vulnerable applications with known CVEs
+#
+#  Network: appnet (10.30.10.0/24)
+#  All services on one network for enumeration practice
+#
+#  Ports: 8001-8015 (one per app) + 7777 (scoreboard)
+#
+###############################################################
+
+networks:
+  appnet:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 10.30.10.0/24
+
+services:
+
+  # ══════════════════════════════════════════
+  #  CMS — Content Management Systems
+  # ══════════════════════════════════════════
+
+  # WordPress 5.6 — CVE-2021-29447 (XXE via Media Upload)
+  # Also: default admin creds, vulnerable plugins
+  wordpress:
+    image: wordpress:5.6-apache
+    container_name: aa-wordpress
+    hostname: wordpress
+    environment:
+      - WORDPRESS_DB_HOST=wordpress-db
+      - WORDPRESS_DB_USER=wp_user
+      - WORDPRESS_DB_PASSWORD=wp_password
+      - WORDPRESS_DB_NAME=wordpress
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.10
+    ports:
+      - "8001:80"
+    depends_on:
+      - wordpress-db
+    restart: unless-stopped
+
+  wordpress-db:
+    image: mysql:5.7
+    container_name: aa-wordpress-db
+    hostname: wordpress-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=wordpress
+      - MYSQL_USER=wp_user
+      - MYSQL_PASSWORD=wp_password
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.11
+    restart: unless-stopped
+
+  wordpress-setup:
+    build: ./wordpress
+    container_name: aa-wordpress-setup
+    depends_on:
+      - wordpress
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.12
+    restart: "no"
+
+  # Joomla 4.2.7 — CVE-2023-23752 (Unauthenticated Info Disclosure)
+  joomla:
+    image: joomla:4.2.7-apache
+    container_name: aa-joomla
+    hostname: joomla
+    environment:
+      - JOOMLA_DB_HOST=joomla-db
+      - JOOMLA_DB_USER=joomla_user
+      - JOOMLA_DB_PASSWORD=joomla_password
+      - JOOMLA_DB_NAME=joomla
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.20
+    ports:
+      - "8002:80"
+    depends_on:
+      - joomla-db
+    restart: unless-stopped
+
+  joomla-db:
+    image: mysql:5.7
+    container_name: aa-joomla-db
+    hostname: joomla-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpassword
+      - MYSQL_DATABASE=joomla
+      - MYSQL_USER=joomla_user
+      - MYSQL_PASSWORD=joomla_password
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.21
+    restart: unless-stopped
+
+  # Drupal 8.5.0 — CVE-2018-7600 (Drupalgeddon2 — Unauthenticated RCE)
+  drupal:
+    image: drupal:8.5.0
+    container_name: aa-drupal
+    hostname: drupal
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.30
+    ports:
+      - "8003:80"
+    restart: unless-stopped
+
+  # ══════════════════════════════════════════
+  #  Servlet Containers & DevOps
+  # ══════════════════════════════════════════
+
+  # Tomcat 9.0.30 — CVE-2020-1938 (Ghostcat AJP File Read)
+  # Also: Manager app with default creds tomcat:tomcat
+  tomcat:
+    build: ./tomcat
+    container_name: aa-tomcat
+    hostname: tomcat
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.40
+    ports:
+      - "8004:8080"
+      - "8009:8009"
+    restart: unless-stopped
+
+  # Jenkins 2.441 — CVE-2024-23897 (Arbitrary File Read via CLI)
+  jenkins:
+    build: ./jenkins
+    container_name: aa-jenkins
+    hostname: jenkins
+    environment:
+      - JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.50
+    ports:
+      - "8005:8080"
+    restart: unless-stopped
+
+  # GitLab CE 13.10.2 — CVE-2021-22205 (RCE via ExifTool)
+  gitlab:
+    image: gitlab/gitlab-ce:13.10.2-ce.0
+    container_name: aa-gitlab
+    hostname: gitlab
+    environment:
+      - GITLAB_OMNIBUS_CONFIG=external_url 'http://localhost:8006'; gitlab_rails['initial_root_password'] = 'P@ssw0rd123';
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.60
+    ports:
+      - "8006:80"
+    shm_size: '256m'
+    restart: unless-stopped
+
+  # ══════════════════════════════════════════
+  #  Infrastructure & Monitoring
+  # ══════════════════════════════════════════
+
+  # Splunk 8.2.0 — Default creds (admin:changeme) + Custom App RCE
+  splunk:
+    image: splunk/splunk:8.2.0
+    container_name: aa-splunk
+    hostname: splunk
+    environment:
+      - SPLUNK_START_ARGS=--accept-license
+      - SPLUNK_PASSWORD=changeme
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.70
+    ports:
+      - "8007:8000"
+    restart: unless-stopped
+
+  # ══════════════════════════════════════════
+  #  CGI & Legacy
+  # ══════════════════════════════════════════
+
+  # Apache 2.4.49 — CVE-2021-41773 (Path Traversal + RCE)
+  apache-cgi:
+    build: ./apache-cgi
+    container_name: aa-apache-cgi
+    hostname: apache-cgi
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.80
+    ports:
+      - "8012:80"
+    restart: unless-stopped
+
+  # Shellshock — CVE-2014-6271 (Bash RCE via CGI)
+  shellshock:
+    build: ./shellshock
+    container_name: aa-shellshock
+    hostname: shellshock
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.81
+    ports:
+      - "8013:80"
+    restart: unless-stopped
+
+  # ══════════════════════════════════════════
+  #  Data & Services
+  # ══════════════════════════════════════════
+
+  # phpMyAdmin 4.8.1 — CVE-2018-12613 (LFI → RCE)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:4.8.1
+    container_name: aa-phpmyadmin
+    hostname: phpmyadmin
+    environment:
+      - PMA_HOST=wordpress-db
+      - PMA_USER=root
+      - PMA_PASSWORD=rootpassword
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.90
+    ports:
+      - "8014:80"
+    depends_on:
+      - wordpress-db
+    restart: unless-stopped
+
+  # OpenLDAP — Anonymous bind + credential disclosure
+  openldap:
+    image: osixia/openldap:1.5.0
+    container_name: aa-openldap
+    hostname: openldap
+    environment:
+      - LDAP_ORGANISATION=Widget Corp
+      - LDAP_DOMAIN=widgetcorp.local
+      - LDAP_ADMIN_PASSWORD=admin123
+      - LDAP_READONLY_USER=true
+      - LDAP_READONLY_USER_USERNAME=readonly
+      - LDAP_READONLY_USER_PASSWORD=readonly123
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.100
+    ports:
+      - "8015:389"
+    restart: unless-stopped
+
+  # ══════════════════════════════════════════
+  #  Scoreboard
+  # ══════════════════════════════════════════
+
+  scoreboard:
+    build: ./scoreboard
+    container_name: aa-scoreboard
+    hostname: scoreboard
+    networks:
+      appnet:
+        ipv4_address: 10.30.10.200
+    ports:
+      - "7777:5000"
+    restart: unless-stopped
